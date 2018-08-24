@@ -10,7 +10,7 @@ class RGBSplitFilterView : public FilterView{
 public:
 	RGBSplitFilterView(RGBSplitFilter *filter = nullptr, std::string flag = "-rgb") 
 		: FilterView(flag), filter(filter) {}
-	virtual void ProcessArgs(int argc, char **argv);
+	virtual void ProcessArgs(std::vector<std::string> arguments);
 	virtual int ProcessInput();
 	virtual void Output();
 private:

@@ -13,8 +13,10 @@
 
 bool interactive;
 std::vector<cv::Mat> images;
+std::vector<std::string> arguments;
 
 int ProcessArgs(int argc, char **argv);
+void SetImagesToFilters();
 void ProcessInput();
 void Execute(Filter *filter, FilterView *view);
 
@@ -24,12 +26,13 @@ int main(int argc, char **argv){
 
 	try{
 		int index = ProcessArgs(argc, argv);
+		SetImagesToFilters();
 
 		if(interactive){
 			ProcessInput();
 		}
 		else{
-			Global::views[index]->ProcessArgs(argc, argv);
+			Global::views[index]->ProcessArgs(arguments);
 			Execute(Global::filters[index], Global::views[index]);
 		}
 
@@ -54,16 +57,23 @@ int ProcessArgs(int argc, char **argv){
 	if (argc < 2){
 		throw std::invalid_argument("Expected a flag or a list of filenames");
 	}
-	interactive = false;
 
+	// check if there is a flag
 	std::string flag(argv[1]);
+	int index = -1;
 	for(int i = 0; i < Global::views.size(); i++){
 		if(flag.compare(Global::views[i]->GetFlag()) == 0){
-			return i;
+			index = i;
 		}
 	}
-	// if could not find a filter, then it is interactive: get images from the arguments
-	for(int i = 1; i < argc; i++){
+
+	// loop through argv
+	int i = (index >= 0) ? 2 : 1;
+	// get images 
+	for(; i < argc; i++){
+		if(std::string(argv[i]).compare("-args") == 0){
+			break;
+		}
 		cv::Mat image = cv::imread(argv[i], cv::IMREAD_COLOR);
 		if(!image.data){
 			throw std::invalid_argument("Could not open the image file.");
@@ -73,10 +83,28 @@ int ProcessArgs(int argc, char **argv){
 	if(images.empty()){
 		throw std::invalid_argument("No image file has been loaded");
 	}
-	interactive = true;
-	return -1;
+
+	if(index < 0){
+		interactive = true;
+		return -1;
+	}
+
+	// it is non interactive: get arguments
+	for(i += 1; i < argc; i++){
+		arguments.push_back(std::string(argv[i]));
+	}
+
+	interactive = false;
+	return index;
 }
 
+void SetImagesToFilters(){
+	for(Filter *filter : Global::filters){
+		for(cv::Mat image : images){
+			filter->AddImage(image);
+		}
+	}
+}
 
 void ProcessInput(){
 	std::cout << "Interactive mode" << std::endl;
@@ -86,9 +114,6 @@ void ProcessInput(){
 	std::vector<FilterView*> shown_views;
 	std::vector<Filter*> shown_filters;
 	for(int i = 0; i < Global::views.size(); i++){
-		for(cv::Mat image : images){
-			Global::filters[i]->AddImage(image);
-		}
 		if (Global::filters[i]->IsApplicable()){
 			shown_views.push_back(Global::views[i]);
 			shown_filters.push_back(Global::filters[i]);

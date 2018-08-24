@@ -1,12 +1,7 @@
 
 #include "rgbsplit_view.h"
 
-void RGBSplitFilterView::ProcessArgs(int argc, char **argv){
-	cv::Mat image = cv::imread(argv[2], cv::IMREAD_COLOR);
-	if(!image.data){
-		throw std::invalid_argument("Could not open the image file.");
-	}
-	filter->AddImage(image);
+void RGBSplitFilterView::ProcessArgs(std::vector<std::string> arguments){
 }
 
 int RGBSplitFilterView::ProcessInput(){

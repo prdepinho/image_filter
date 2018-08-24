@@ -1,19 +1,15 @@
 
 #include "blur_view.h"
 
-void BlurFilterView::ProcessArgs(int argc, char **argv){
+void BlurFilterView::ProcessArgs(std::vector<std::string> arguments){
 	int radius;
 	float weight;
-	cv::Mat image = cv::imread(argv[2], cv::IMREAD_COLOR);
-	if(!image.data){
-		throw std::invalid_argument("Could not open the image file.");
-	}
-	if(argc != 5){
+	if(arguments.size() < 2){
 		throw std::invalid_argument("Wrong number of arguments. Expected radius and weight for blur operation");
 	}
 	try{
-		radius = std::stoi(std::string(argv[3]));
-		weight = std::stof(std::string(argv[4]));
+		radius = std::stoi(arguments[0]);
+		weight = std::stof(arguments[1]);
 	}catch(std::exception &e){
 		throw std::invalid_argument("Expected an int and a float");
 	}
@@ -27,7 +23,6 @@ void BlurFilterView::ProcessArgs(int argc, char **argv){
 	if(filter == nullptr){
 		throw FilterException("Filter is nullptr");
 	}
-	filter->AddImage(image);
 	filter->SetRadius(radius);
 	filter->SetWeight(weight);
 }

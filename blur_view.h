@@ -10,7 +10,7 @@ class BlurFilterView : public FilterView{
 public:
 	BlurFilterView(BlurFilter *filter = nullptr, std::string flag = "-blur") 
 		: FilterView(flag), filter(filter) {}
-	virtual void ProcessArgs(int argc, char **argv);
+	virtual void ProcessArgs(std::vector<std::string> arguments);
 	virtual int ProcessInput();
 	virtual void Output();
 private:
