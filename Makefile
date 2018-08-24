@@ -18,4 +18,4 @@ clean:
 	rm -f main *.o 
 
 clean_lena:
-	rm -f blue_lena.png green_lena.png red_lena.png blurred.png
+	rm -f blue_lena.png green_lena.png red_lena.png blurred_lena.png

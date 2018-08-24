@@ -12,7 +12,7 @@
 #include "global_filters.h"
 
 bool interactive;
-std::vector<cv::Mat> images;
+std::vector<std::string> filenames;
 std::vector<std::string> arguments;
 
 int ProcessArgs(int argc, char **argv);
@@ -69,18 +69,12 @@ int ProcessArgs(int argc, char **argv){
 
 	// loop through argv
 	int i = (index >= 0) ? 2 : 1;
-	// get images 
-	for(; i < argc; i++){
-		if(std::string(argv[i]).compare("-args") == 0){
-			break;
-		}
-		cv::Mat image = cv::imread(argv[i], cv::IMREAD_COLOR);
-		if(!image.data){
-			throw std::invalid_argument("Could not open the image file.");
-		}
-		images.push_back(image);
+	// get filenames 
+	while(i < argc && std::string(argv[i]).compare("-args") != 0){
+		filenames.push_back(std::string(argv[i]));
+		i++;
 	}
-	if(images.empty()){
+	if(filenames.empty()){
 		throw std::invalid_argument("No image file has been loaded");
 	}
 
@@ -100,8 +94,13 @@ int ProcessArgs(int argc, char **argv){
 
 void SetImagesToFilters(){
 	for(Filter *filter : Global::filters){
-		for(cv::Mat image : images){
+		for(std::string name : filenames){
+			cv::Mat image = cv::imread(name.c_str(), cv::IMREAD_COLOR);
+			if(!image.data){
+				throw std::invalid_argument("Could not open the image file.");
+			}
 			filter->AddImage(image);
+			filter->AddName(name);
 		}
 	}
 }

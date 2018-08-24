@@ -10,7 +10,7 @@ int RGBSplitFilterView::ProcessInput(){
 
 void RGBSplitFilterView::Output(){
 	std::vector<cv::Mat> results = filter->GetResults();
-	cv::imwrite("red_lena.png", results[0]);
-	cv::imwrite("green_lena.png", results[1]);
-	cv::imwrite("blue_lena.png", results[2]);
+	cv::imwrite(("red_"   + filter->GetName()).c_str(), results[0]);
+	cv::imwrite(("green_" + filter->GetName()).c_str(), results[1]);
+	cv::imwrite(("blue_"  + filter->GetName()).c_str(), results[2]);
 }

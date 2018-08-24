@@ -55,5 +55,5 @@ int BlurFilterView::ProcessInput(){
 }
 
 void BlurFilterView::Output(){
-	cv::imwrite("blurred.png", filter->GetResult());
+	cv::imwrite(("blurred_" + filter->GetName()).c_str(), filter->GetResult());
 }
