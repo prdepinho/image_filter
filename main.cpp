@@ -16,7 +16,7 @@ std::string filename;
 std::vector<std::string> arguments;
 
 int ProcessArgs(int argc, char **argv);
-void SetImagesToFilters();
+void SetImageToFilter();
 void ProcessInput();
 void Execute(Filter *filter, FilterView *view);
 inline void ShowType(cv::Mat image);
@@ -27,7 +27,7 @@ int main(int argc, char **argv){
 
 	try{
 		int index = ProcessArgs(argc, argv);
-		SetImagesToFilters();
+		SetImageToFilter();
 
 		if(interactive){
 			ProcessInput();
@@ -68,6 +68,7 @@ int ProcessArgs(int argc, char **argv){
 		}
 	}
 
+	// get input filename
 	int index = (filter_index >= 0) ? 2 : 1;
 	filename = std::string(argv[index]);
 
@@ -76,7 +77,7 @@ int ProcessArgs(int argc, char **argv){
 		return -1;
 	}
 
-	// it is non interactive: get arguments
+	// if it is non interactive: get arguments
 	for(index += 1; index < argc; index++){
 		arguments.push_back(std::string(argv[index]));
 	}
@@ -85,7 +86,7 @@ int ProcessArgs(int argc, char **argv){
 	return filter_index;
 }
 
-void SetImagesToFilters(){
+void SetImageToFilter(){
 	cv::Mat image = cv::imread(filename, cv::IMREAD_UNCHANGED);
 	if(!image.data){
 		throw std::invalid_argument("Could not open the image file.");
@@ -115,12 +116,17 @@ void ProcessInput(){
 	}
 	std::cout << "Available filters: " << std::endl;
 	for(int i = 0; i < shown_filters.size(); i++){
-		std::cout << i << ": " << shown_filters[i]->GetFilterName() << std::endl;
+		std::cout << i + 1 << ": " << shown_filters[i]->GetFilterName() << std::endl;
 	}
-	std::cout << "-1: Exit." << std::endl;
+	std::cout << "0: Exit." << std::endl;
 
-	int index = -1;
+	// read input
+	int index = 0;
 	std::cin >> index;
+	if(index == 0){
+		return;
+	}
+	index -= 1;
 	if(index < 0 || index >= shown_filters.size()){
 		throw std::out_of_range("No filter selected");
 	}
