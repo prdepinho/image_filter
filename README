@@ -1,4 +1,50 @@
 
 How to use this program.
 
+--------------------------------------------------------------------------------
+
+This program receives 
+
+
+================================================================================
+
 How to implement new filters.
+
+--------------------------------------------------------------------------------
+
+Implement a new filter you must create a class that inherits from Filter and a
+class that inherits from FilterView.
+
+--------------------------------------------------------------------------------
+
+Filter has three methods that have to be implemented:
+
+AddImage(cv::Mat image) includes in input image to the filter. Many images may
+be input, if the filter requires multiple images.
+
+IsApplicable() returns true if the added files are of the right type for
+processing.
+
+Apply() executes the processing of the filter.
+
+--------------------------------------------------------------------------------
+
+FilterView is a class that deals with input and output of data to and from the
+filter.  FilterView has three methods that have to be implemented:
+
+ProcessArgs(std::vector<std::string> arguments) receives a vector of strings
+that are passed as the program's arguments for the filter. In this methos you
+should expect all parameters necessary and convert them to their correct types.
+
+ProcessInput() is not unlike ProcessArgs, but it is for interactive input, so
+you should ask the user for the necessary parameters through standard input.
+
+Output() is where you should implement the output of the filter. Writting the
+result in a file, for exemple.
+
+Additionally, you should modify FilterView's protected std::string flag. This
+value is the flag associated with the filter recognized in the program's
+arguments.
+ 
+--------------------------------------------------------------------------------
+

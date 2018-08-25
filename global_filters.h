@@ -7,6 +7,7 @@
 #include "blur_view.h"
 #include "rgbsplit.h"
 #include "rgbsplit_view.h"
+#include "grayscale.h"
 
 namespace Global{
 
@@ -19,10 +20,11 @@ BlurFilter blur;
 BlurFilterView blur_view(&blur);
 RGBSplitFilter rgb;
 RGBSplitFilterView rgb_view(&rgb);
+GreyscaleFilter gray;
 
-void Set(){
-	filters = {&blur, &rgb};
-	views = {&blur_view, &rgb_view};
+void SetFilters(){
+	filters = {&blur, &rgb, &gray};
+	views = {&blur_view, &rgb_view, &gray};
 }
 
 }

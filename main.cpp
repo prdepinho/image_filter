@@ -22,7 +22,7 @@ void Execute(Filter *filter, FilterView *view);
 
 int main(int argc, char **argv){
 
-	Global::Set();	
+	Global::SetFilters();
 
 	try{
 		int index = ProcessArgs(argc, argv);
@@ -95,7 +95,7 @@ int ProcessArgs(int argc, char **argv){
 void SetImagesToFilters(){
 	for(Filter *filter : Global::filters){
 		for(std::string name : filenames){
-			cv::Mat image = cv::imread(name.c_str(), cv::IMREAD_COLOR);
+			cv::Mat image = cv::imread(name.c_str(), cv::IMREAD_UNCHANGED);
 			if(!image.data){
 				throw std::invalid_argument("Could not open the image file.");
 			}
@@ -117,6 +117,10 @@ void ProcessInput(){
 			shown_views.push_back(Global::views[i]);
 			shown_filters.push_back(Global::filters[i]);
 		}
+	}
+	if(shown_views.empty()){
+		std::cout << "No filters available for input images" << std::endl;
+		return;
 	}
 	// show filter views
 	for(int i = 0; i < shown_views.size(); i++){

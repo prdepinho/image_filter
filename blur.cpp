@@ -1,9 +1,19 @@
 
 #include "blur.h"
 
-// Works with any image.
+// The image has to have at least three channels.
 bool BlurFilter::IsApplicable() const {
-	return true;
+	switch(image.type()){
+		case CV_16SC3: case CV_16SC4:
+		case CV_16UC3: case CV_16UC4:
+		case CV_32FC3: case CV_32FC4:
+		case CV_32SC3: case CV_32SC4:
+		case CV_64FC3: case CV_64FC4:
+		case CV_8SC3: case CV_8SC4:
+		case CV_8UC3: case CV_8UC4:
+			return true;
+	}
+	return false;
 }
 
 bool BlurFilter::Apply() {

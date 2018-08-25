@@ -13,16 +13,9 @@ void BlurFilterView::ProcessArgs(std::vector<std::string> arguments){
 	}catch(std::exception &e){
 		throw std::invalid_argument("Expected an int and a float");
 	}
-	if(radius < 1){
-		throw std::invalid_argument("Radius < 1");
-	}
-	if(weight <= 0.0f){
-		throw std::invalid_argument("Weight <= 0");
-	}
 
-	if(filter == nullptr){
-		throw FilterException("Filter is nullptr");
-	}
+	CheckParameters(radius, weight);
+
 	filter->SetRadius(radius);
 	filter->SetWeight(weight);
 }
@@ -39,16 +32,8 @@ int BlurFilterView::ProcessInput(){
 		throw std::invalid_argument("Expected an int and a float");
 	}
 
-	if(radius < 1){
-		throw std::invalid_argument("Radius < 1");
-	}
-	if(weight <= 0.0f){
-		throw std::invalid_argument("Weight <= 0");
-	}
+	CheckParameters(radius, weight);
 
-	if(filter == nullptr){
-		throw FilterException("Filter is nullptr");
-	}
 	filter->SetRadius(radius);
 	filter->SetWeight(weight);
 	return 0;
@@ -56,4 +41,13 @@ int BlurFilterView::ProcessInput(){
 
 void BlurFilterView::Output(){
 	cv::imwrite(("blurred_" + filter->GetName()).c_str(), filter->GetResult());
+}
+
+void BlurFilterView::CheckParameters(int radius, float weight){
+	if(radius < 1){
+		throw std::invalid_argument("Radius < 1");
+	}
+	if(weight <= 0.0f){
+		throw std::invalid_argument("Weight <= 0");
+	}
 }
