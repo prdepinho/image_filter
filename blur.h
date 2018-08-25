@@ -7,11 +7,11 @@ class BlurFilter : public Filter {
 public:
 	BlurFilter(int radius = 1, float weight = 1.0f) 
 		: radius(radius), weight(weight) {}
-	virtual std::string GetFilterName() const override { return std::string("Blur"); }
 	virtual bool IsApplicable() const override;
 	virtual bool Apply() override;
 	virtual void SetImage(cv::Mat image) override { this->image = image; }
 	virtual void SetFileName(std::string name) override { this->name = name; }
+
 	void SetRadius(int radius) { this->radius = radius; }
 	void SetWeight(float weight) { this->weight = weight; }
 	std::string GetName() const{ return name; }

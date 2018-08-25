@@ -1,7 +1,7 @@
 
 #include "blur.h"
 
-// The image has to have at least three channels.
+// The image may have any number of channels.
 bool BlurFilter::IsApplicable() const {
 	switch(image.type()){
 		case CV_8UC1: case CV_8UC2:

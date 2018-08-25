@@ -115,8 +115,8 @@ void ProcessInput(){
 		return;
 	}
 	std::cout << "Available filters: " << std::endl;
-	for(int i = 0; i < shown_filters.size(); i++){
-		std::cout << i + 1 << ": " << shown_filters[i]->GetFilterName() << std::endl;
+	for(int i = 0; i < shown_views.size(); i++){
+		std::cout << i + 1 << ": " << shown_views[i]->GetFilterName() << std::endl;
 	}
 	std::cout << "0: Exit." << std::endl;
 

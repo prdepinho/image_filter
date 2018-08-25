@@ -23,14 +23,11 @@ void BlurFilterView::ProcessArgs(std::vector<std::string> arguments){
 int BlurFilterView::ProcessInput(){
 	int radius = -1;
 	float weight = -1;
-	try{
-		std::cout << "Radius: ";
-		std::cin >> radius;
-		std::cout << "Weight: ";
-		std::cin >> weight;
-	}catch(std::exception &e){
-		throw std::invalid_argument("Expected an int and a float");
-	}
+
+	std::cout << "Radius: ";
+	std::cin >> radius;
+	std::cout << "Weight: ";
+	std::cin >> weight;
 
 	CheckParameters(radius, weight);
 

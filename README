@@ -1,50 +1,182 @@
 
 How to use this program.
 
---------------------------------------------------------------------------------
 
-This program receives 
+The following line applies the RGB Split (specified by the flag -rgb) filter on
+the input file lena.png:
+
+./main -rgb lena.png
+
+If a filter requires flags, they should be put after the input filename, as the
+follows:
+
+./main -blur lena.png 5 1
+
+These lines execute the program in non-interactive mode. If no flag is
+specified, the program enters interactive mode, as the following:
+
+./main lena.png
+
+Then the program will show a list of available filters to choose from, and 
+request the user to input any necessary parameters.
 
 
 ================================================================================
 
 How to implement new filters.
 
+
+There are two interfaces used by the program in order to interact with filters.
+Filter is the interface of the filter itself, while FilterView is used to deal
+with input and output of data for the filter through command line. 
+
+These interfaces may be implemented by a single class or separate classes, 
+depending on the complexity of the code.
+
+An instance of the implementation of each interface then must be added to
+global_filters.h, and a reference for the Filter object should be put into
+the vector Global::filters, and a reference for the FilterView object into
+the vector Global::views. These vectors are used by the program to access 
+implemented filters and their views.
+
+In order to know more about the interfaces and their functions, view the
+documentation in filter.h.
+
+
+An example: A Greyscale filter. 
+
+This filter should receive a colored image and return a black and white single
+channel image as output.
+
+Since this filter does not require any parameter other than the input file, and
+the filter code is not complex, we can implement both interfaces in a single
+class.
+
+What follows is the header file greyscale.h:
+
 --------------------------------------------------------------------------------
+#pragma once
 
-Implement a new filter you must create a class that inherits from Filter and a
-class that inherits from FilterView.
+#include "filter.h"
+#include <opencv2/opencv.hpp>
+
+class GreyscaleFilter : public Filter, public FilterView {
+public:
+	// Filter functions
+	virtual bool IsApplicable() const override;
+	virtual bool Apply() override;
+	virtual void SetImage(cv::Mat image) override { this->image = image; }
+	virtual void SetFileName(std::string name) override { this->name = name; }
+
+	// FilterView functions
+	virtual std::string GetFlag() override { return "-grey"; }
+	virtual std::string GetFilterName() const override { return "Greyscale"; }
+	virtual void ProcessArgs(std::vector<std::string> arguments) override {}
+	virtual int ProcessInput() override { return 0; }
+	virtual void Output() override;
+private:
+	std::string name;
+	cv::Mat image;
+	cv::Mat result;
+};
+--------------------------------------------------------------------------------
+                                                                    greyscale.h
+
+First, our class GreyscaleFiletr has to have some member variables. These are
+the input image, which is set by SetImage; name, which is set by SetFileName;
+and result, which is produced by Apply.
+
+Some of these functions are simple eneugh to be implemented in the header
+itself. SetImage and SetFileName are called by the program to set the input file
+and its filename for the filter.
+
+IsApplicable should check whether the input file can be processed by the filter
+or not. It should take into consideration its image type. As illustrated below,
+GreyscaleFilter only accepts images of 3 or 4 channels of 8 bits.
 
 --------------------------------------------------------------------------------
+bool GreyscaleFilter::IsApplicable() const {
+	switch(image.type()){
+		case CV_8UC3: case CV_8UC4:
+			return true;
+	}
+	return false;
+}
+--------------------------------------------------------------------------------
+                                                                  greyscale.cpp
 
-Filter has three methods that have to be implemented:
+GetFlag should return the flag used in non-interactive command line, while
+GetFilterName is the name that appears in the filter list in interactive mode.
 
-AddImage(cv::Mat image) includes in input image to the filter. Many images may
-be input, if the filter requires multiple images.
+ProcessArgs is called in non-interactive mode and passes the filter arguments in
+a vector. This method should check and store all necessary parameters.
 
-IsApplicable() returns true if the added files are of the right type for
-processing.
+ProcessInput is not unlike ProcessArgs, but it is called in interactive mode 
+after the user has chosen a filter. This methos is responsible for requesting
+the filter parameters from the user by means of standard input.
 
-Apply() executes the processing of the filter.
+The Apply method is the implementation of the filter itself. This method is
+called after SetImage and ProcessArgs or ProcessInput, so the input image and
+the necessary parameters should be available now. The result of the processing
+is stored in the member variable result.
+
+The next code snippet shows how GreyscaleFilter creates a single channel 8 bit
+image as output and copies the avarage values of each pixel from each channel
+of the input image to the output.
 
 --------------------------------------------------------------------------------
+bool GreyscaleFilter::Apply() {
+	cv::Mat channels[3];
+	result.create(image.rows, image.cols, CV_8UC1);
+	cv::split(image, channels);
 
-FilterView is a class that deals with input and output of data to and from the
-filter.  FilterView has three methods that have to be implemented:
-
-ProcessArgs(std::vector<std::string> arguments) receives a vector of strings
-that are passed as the program's arguments for the filter. In this methos you
-should expect all parameters necessary and convert them to their correct types.
-
-ProcessInput() is not unlike ProcessArgs, but it is for interactive input, so
-you should ask the user for the necessary parameters through standard input.
-
-Output() is where you should implement the output of the filter. Writting the
-result in a file, for exemple.
-
-Additionally, you should modify FilterView's protected std::string flag. This
-value is the flag associated with the filter recognized in the program's
-arguments.
- 
+	for(int i = 0; i < image.rows; i++){
+		for(int j = 0; j < image.cols; j++){
+			int pix = 0;
+			for(int c = 0; c < 3; c++){
+				pix += channels[c].at<uchar>(i, j);
+			}
+			pix /= 3;
+			result.at<uchar>(i, j) = pix;
+		}
+	}
+}
 --------------------------------------------------------------------------------
+                                                                  greyscale.cpp
+
+Finally, the last function to be called is Output, which can be used to save
+the result image into a file, as is shown below.
+
+--------------------------------------------------------------------------------
+void GreyscaleFilter::Output(){
+	cv::imwrite(("grey_" + name).c_str(), result);
+	std::cout << "output type: " << result.type() << std::endl;
+}
+--------------------------------------------------------------------------------
+                                                                  greyscale.cpp
+
+When the filter is ready, you must create a variable of GreyscaleFilter in
+global_filters.h and add a reference to it to Global::filters and Global::views
+vectors in Global::SetFilters method as so:
+
+--------------------------------------------------------------------------------
+GreyscaleFilter gray;
+
+void SetFilters(){
+	filters = {&blur, &rgb, &gray};
+	views = {&blur_view, &rgb, &gray};
+}
+--------------------------------------------------------------------------------
+                                                               global_filters.h
+
+Then, do not forget to update the Makefile to include greyscale.h to the
+INCL macro and greyscale.o to the OBJS macro.
+
+--------------------------------------------------------------------------------
+INCL=filter.h global_filters.h blur.h blur_view.h rgbsplit.h greyscale.h
+OBJS=blur.o blur_view.o rgbsplit.o greyscale.o main.o
+--------------------------------------------------------------------------------
+                                                                       Makefile
+
+That should be every thing necessary to implement a new filter.
 

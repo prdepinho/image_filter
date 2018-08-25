@@ -7,20 +7,16 @@
 
 class RGBSplitFilter : public Filter, public FilterView {
 public:
-	RGBSplitFilter(std::string flag = "-rgb") 
-		: FilterView(flag) {}
-	virtual std::string GetFilterName() const override { return std::string("RGB Split"); }
 	virtual bool IsApplicable() const override;
 	virtual bool Apply() override;
 	virtual void SetImage(cv::Mat image) override { this->image = image; }
 	virtual void SetFileName(std::string name) override { this->name = name; }
 
-	virtual void ProcessArgs(std::vector<std::string> arguments);
-	virtual int ProcessInput();
-	virtual void Output();
-
-	std::string GetName() const{ return name; }
-	std::vector<cv::Mat> GetResults() const{ return results; }
+	virtual std::string GetFlag() override { return "-rgb"; }
+	virtual std::string GetFilterName() const override { return "RGB Split"; }
+	virtual void ProcessArgs(std::vector<std::string> arguments) override;
+	virtual int ProcessInput() override;
+	virtual void Output() override;
 private:
 	std::string name;
 	cv::Mat image;

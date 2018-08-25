@@ -11,7 +11,7 @@ namespace Global{
 std::vector<Filter*> filters;
 std::vector<FilterView*> views;
 
-// add filters here
+// add filters and views here
 
 BlurFilter blur;
 BlurFilterView blur_view(&blur);
