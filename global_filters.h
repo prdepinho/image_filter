@@ -1,13 +1,11 @@
 #pragma once
 
 #include "filter.h"
-#include "filter_view.h"
-#include "filter_exception.h"
 #include "blur.h"
 #include "blur_view.h"
 #include "rgbsplit.h"
 #include "rgbsplit_view.h"
-#include "grayscale.h"
+#include "greyscale.h"
 
 namespace Global{
 

@@ -1,10 +1,8 @@
 #pragma once
 
 #include "rgbsplit.h"
-#include "filter_view.h"
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
-#include "filter_exception.h"
 
 class RGBSplitFilterView : public FilterView{
 public:

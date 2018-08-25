@@ -21,8 +21,8 @@ void BlurFilterView::ProcessArgs(std::vector<std::string> arguments){
 }
 
 int BlurFilterView::ProcessInput(){
-	int radius;
-	float weight;
+	int radius = -1;
+	float weight = -1;
 	try{
 		std::cout << "Radius: ";
 		std::cin >> radius;
