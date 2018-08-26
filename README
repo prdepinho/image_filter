@@ -20,6 +20,26 @@ specified, the program enters interactive mode, as the following:
 Then the program will show a list of available filters to choose from, and 
 request the user to input any necessary parameters.
 
+================================================================================
+
+The current implemented filters are the following:
+
+RGB Split: -rgb
+
+	Splits the color channels of an 8 bit image and saves one image for each.
+
+Blur: -blur radius weght
+
+	Blurs an 8 bit image of any number of channls by setting each pixel as the
+	weighted mean of all its neighbors in its radius.
+
+	- radius: a positive integer
+
+	- weight: a float greater than zero.
+
+Greyscale: -grey
+
+	Creates a single channel black and white version of an 8 bit color image.
 
 ================================================================================
 
@@ -28,16 +48,16 @@ How to implement new filters.
 
 There are two interfaces used by the program in order to interact with filters.
 Filter is the interface of the filter itself, while FilterView is used to deal
-with input and output of data for the filter through command line. 
+with input and output of data. These interfaces may be implemented by a single
+class or separate classes, depending on the complexity of the code.
 
-These interfaces may be implemented by a single class or separate classes, 
-depending on the complexity of the code.
+Once implemented an instance of each interface must be added to
+global_filters.h, and a reference for the Filter object should be put into the
+vector Global::filters, and a reference for the FilterView object into the
+vector Global::views. 
 
-An instance of the implementation of each interface then must be added to
-global_filters.h, and a reference for the Filter object should be put into
-the vector Global::filters, and a reference for the FilterView object into
-the vector Global::views. These vectors are used by the program to access 
-implemented filters and their views.
+Problems are treated by throwing exceptions, which the main program catches and
+exits gracefully.
 
 In order to know more about the interfaces and their functions, view the
 documentation in filter.h.
@@ -45,11 +65,11 @@ documentation in filter.h.
 
 An example: A Greyscale filter. 
 
-This filter should receive a colored image and return a black and white single
-channel image as output.
+This filter should receive an 8 bit colored image and return a black and white
+single channel image as output.
 
 Since this filter does not require any parameter other than the input file, and
-the filter code is not complex, we can implement both interfaces in a single
+the filter code is not complicated, we can implement both interfaces in a single
 class.
 
 What follows is the header file greyscale.h:
@@ -71,8 +91,8 @@ public:
 	// FilterView functions
 	virtual std::string GetFlag() override { return "-grey"; }
 	virtual std::string GetFilterName() const override { return "Greyscale"; }
-	virtual void ProcessArgs(std::vector<std::string> arguments) override {}
-	virtual int ProcessInput() override { return 0; }
+	virtual std::vector<std::string> GetParameterNames() const { return std::vector<std::string>(); }
+	virtual void ProcessArgs(std::vector<std::string> arguments) override {};
 	virtual void Output() override;
 private:
 	std::string name;
@@ -82,17 +102,18 @@ private:
 --------------------------------------------------------------------------------
                                                                     greyscale.h
 
-First, our class GreyscaleFiletr has to have some member variables. These are
-the input image, which is set by SetImage; name, which is set by SetFileName;
-and result, which is produced by Apply.
-
 Some of these functions are simple eneugh to be implemented in the header
 itself. SetImage and SetFileName are called by the program to set the input file
 and its filename for the filter.
 
-IsApplicable should check whether the input file can be processed by the filter
-or not. It should take into consideration its image type. As illustrated below,
-GreyscaleFilter only accepts images of 3 or 4 channels of 8 bits.
+Among GreyscaleFilter's member variables are the input image, which is set by
+SetImage; name, which is set by SetFileName; and result, which is produced by
+Apply.
+
+The function IsApplicable should check whether the input file can be processed
+by the filter or not. It should take into consideration its image type. As
+illustrated below, GreyscaleFilter only accepts images of 3 or 4 channels of 8
+bits. Only applicable filters are shown as options in interactive mode.
 
 --------------------------------------------------------------------------------
 bool GreyscaleFilter::IsApplicable() const {
@@ -108,21 +129,17 @@ bool GreyscaleFilter::IsApplicable() const {
 GetFlag should return the flag used in non-interactive command line, while
 GetFilterName is the name that appears in the filter list in interactive mode.
 
-ProcessArgs is called in non-interactive mode and passes the filter arguments in
+ProcessArgs is called in both modes and passes the filter arguments in
 a vector. This method should check and store all necessary parameters.
 
-ProcessInput is not unlike ProcessArgs, but it is called in interactive mode 
-after the user has chosen a filter. This methos is responsible for requesting
-the filter parameters from the user by means of standard input.
-
 The Apply method is the implementation of the filter itself. This method is
-called after SetImage and ProcessArgs or ProcessInput, so the input image and
+called after SetImage and ProcessArgs, so the input image and
 the necessary parameters should be available now. The result of the processing
-is stored in the member variable result.
+is stored in the result member variable.
 
 The next code snippet shows how GreyscaleFilter creates a single channel 8 bit
-image as output and copies the avarage values of each pixel from each channel
-of the input image to the output.
+image as output and copies to it the avarage values of each pixel from each
+channel of the input image.
 
 --------------------------------------------------------------------------------
 bool GreyscaleFilter::Apply() {
@@ -150,7 +167,6 @@ the result image into a file, as is shown below.
 --------------------------------------------------------------------------------
 void GreyscaleFilter::Output(){
 	cv::imwrite(("grey_" + name).c_str(), result);
-	std::cout << "output type: " << result.type() << std::endl;
 }
 --------------------------------------------------------------------------------
                                                                   greyscale.cpp
@@ -169,11 +185,10 @@ void SetFilters(){
 --------------------------------------------------------------------------------
                                                                global_filters.h
 
-Then, do not forget to update the Makefile to include greyscale.h to the
-INCL macro and greyscale.o to the OBJS macro.
+At last, do not forget to update the Makefile to include greyscale.o to the
+OBJS macro:
 
 --------------------------------------------------------------------------------
-INCL=filter.h global_filters.h blur.h blur_view.h rgbsplit.h greyscale.h
 OBJS=blur.o blur_view.o rgbsplit.o greyscale.o main.o
 --------------------------------------------------------------------------------
                                                                        Makefile

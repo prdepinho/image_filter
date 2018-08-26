@@ -131,9 +131,25 @@ void ProcessInput(){
 		throw std::out_of_range("No filter selected");
 	}
 	std::cout << shown_views[index]->GetFlag() << " chosen" << std::endl;
-	if(shown_views[index]->ProcessInput() == 0){
-		Execute(shown_filters[index], shown_views[index]);
+
+	// read parameters
+	std::vector<std::string> parameter_names = shown_views[index]->GetParameterNames();
+	if(!parameter_names.empty()){
+		std::cout << "Input parameters. To quit input 'q'." << std::endl;
+		std::vector<std::string> parameter_values;
+		for(std::string name : parameter_names){
+			std::cout << name << ": ";
+			std::string input;
+			std::cin >> input;
+			if(input.compare("q") == 0){
+				return;
+			}
+			parameter_values.push_back(input);
+		}
+		shown_views[index]->ProcessArgs(parameter_values); 
 	}
+
+	Execute(shown_filters[index], shown_views[index]);
 }
 
 void Execute(Filter *filter, FilterView *view){

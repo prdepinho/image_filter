@@ -14,8 +14,8 @@ public:
 
 	virtual std::string GetFlag() override { return "-rgb"; }
 	virtual std::string GetFilterName() const override { return "RGB Split"; }
-	virtual void ProcessArgs(std::vector<std::string> arguments) override;
-	virtual int ProcessInput() override;
+	virtual std::vector<std::string> GetParameterNames() const { return {}; }
+	virtual void ProcessArgs(std::vector<std::string> arguments) override {};
 	virtual void Output() override;
 private:
 	std::string name;

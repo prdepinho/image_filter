@@ -31,13 +31,6 @@ bool RGBSplitFilter::Apply() {
 	return true;
 }
 
-void RGBSplitFilter::ProcessArgs(std::vector<std::string> arguments){
-}
-
-int RGBSplitFilter::ProcessInput(){
-	return 0;
-}
-
 void RGBSplitFilter::Output(){
 	cv::imwrite(("red_"   + name).c_str(), results[0]);
 	cv::imwrite(("green_" + name).c_str(), results[1]);
