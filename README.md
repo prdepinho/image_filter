@@ -26,12 +26,13 @@ The current implemented filters are the following:
 
 RGB Split: -rgb
 
-	Splits the color channels of an 8 bit image and saves one image for each.
+	Splits the color channels of an 8 bit image and saves one image for
+	each.
 
 Blur: -blur radius weght
 
-	Blurs an 8 bit image of any number of channls by setting each pixel as the
-	weighted mean of all its neighbors in its radius.
+	Blurs an 8 bit image of any number of channls by setting each pixel as
+	the weighted mean of all its neighbors in its radius.
 
 	- radius: a positive integer
 
@@ -39,7 +40,8 @@ Blur: -blur radius weght
 
 Greyscale: -grey
 
-	Creates a single channel black and white version of an 8 bit color image.
+	Creates a single channel black and white version of an 8 bit color
+	image.
 
 ================================================================================
 
