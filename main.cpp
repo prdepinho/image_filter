@@ -11,16 +11,17 @@
 
 #define SHOW_INPUT_TYPE false
 
-bool interactive;
-std::string filename;
-std::vector<std::string> arguments;
-
-
-int ProcessArgs(int argc, char **argv);
+bool ProcessArgs(int argc, char **argv);
 void SetImageToFilters();
 void ProcessInteraction();
 void ExecuteFilter(Filter *filter);
 inline void ShowType(cv::Mat image);
+
+
+std::string filename;
+std::vector<std::string> arguments;
+Filter *selected_filter = nullptr;
+
 
 int main(int argc, char **argv){
 
@@ -28,18 +29,17 @@ int main(int argc, char **argv){
 
 	try{
 
-		int index = ProcessArgs(argc, argv);
-		SetImageToFilters();
+		bool interactive = ProcessArgs(argc, argv); 
 
+		SetImageToFilters();
 		if(interactive){
 			ProcessInteraction();
 		}
-		else{
-			Global::filters[index]->SetParameters(arguments);
-			ExecuteFilter(Global::filters[index]);
-		}
 
-		
+		if(selected_filter != nullptr){
+			selected_filter->SetParameters(arguments); 
+			ExecuteFilter(selected_filter);
+		}
 
 	}catch(const FilterException &e){
 		std::cout << "Filter exception: " << e.what() << std::endl;
@@ -58,7 +58,7 @@ int main(int argc, char **argv){
 	return 0;
 }
 
-int ProcessArgs(int argc, char **argv){
+bool ProcessArgs(int argc, char **argv){
 	if (argc < 2){
 		throw std::invalid_argument("Expected a flag or a list of filenames");
 	}
@@ -69,6 +69,7 @@ int ProcessArgs(int argc, char **argv){
 	for(int i = 0; i < Global::filters.size(); i++){
 		if(flag.compare(Global::filters[i]->GetFlag()) == 0){
 			filter_index = i;
+			break;
 		}
 	}
 
@@ -77,8 +78,7 @@ int ProcessArgs(int argc, char **argv){
 	filename = std::string(argv[index]);
 
 	if(filter_index < 0){
-		interactive = true;
-		return -1;
+		return true;
 	}
 
 	// if it is non interactive: get arguments
@@ -86,8 +86,8 @@ int ProcessArgs(int argc, char **argv){
 		arguments.push_back(std::string(argv[index]));
 	}
 
-	interactive = false;
-	return filter_index;
+	selected_filter = Global::filters[filter_index];
+	return false;
 }
 
 void SetImageToFilters(){
@@ -132,13 +132,15 @@ void ProcessInteraction(){
 	if(index < 0 || index >= shown_filters.size()){
 		throw std::out_of_range("No filter selected");
 	}
-	std::cout << shown_filters[index]->GetFlag() << " chosen" << std::endl;
+
+	selected_filter = shown_filters[index];
+	std::cout << selected_filter->GetFlag() << " selected" << std::endl;
 
 	// read parameters
-	std::vector<std::string> parameter_names = shown_filters[index]->GetParameterNames();
+	std::vector<std::string> parameter_names = selected_filter->GetParameterNames();
 	if(!parameter_names.empty()){
 		std::cout << "Input parameters. To quit input 'q'." << std::endl;
-		std::vector<std::string> parameter_values;
+		arguments = std::vector<std::string>();
 		for(std::string name : parameter_names){
 			std::cout << name << ": ";
 			std::string input;
@@ -146,12 +148,10 @@ void ProcessInteraction(){
 			if(input.compare("q") == 0){
 				return;
 			}
-			parameter_values.push_back(input);
+			arguments.push_back(input);
 		}
-		shown_filters[index]->SetParameters(parameter_values); 
 	}
 
-	ExecuteFilter(shown_filters[index]);
 }
 
 void ExecuteFilter(Filter *filter){
