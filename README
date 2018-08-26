@@ -51,7 +51,7 @@ deal with input and output of data to it.
 
 Once implemented an instance of the interface must be added to
 global_filters.h, and a reference of the object should be put into the
-vector Global::filters
+vector set to FilterFramework in main.cpp.
 
 Problems are treated by throwing exceptions, which the main program catches and
 exits gracefully.
@@ -162,13 +162,20 @@ void GreyscaleFilter::Output(){
                                                                   greyscale.cpp
 
 When the filter is ready, you must create a variable of GreyscaleFilter in
-global_filters.h and add a reference to it to Global::filters as so:
+global_filters.h and add a reference to it to FilterFramework as so:
 
 --------------------------------------------------------------------------------
-GreyscaleFilter gray;
+int main(int argc, char **argv){
 
-void SetFilters(){
-	filters = {&blur, &rgb, &gray};
+	FilterFramework framework;
+
+	BlurFilter blur;
+	RGBSplitFilter rgb;
+	GreyscaleFilter gray;
+
+	framework.SetFilters({&blur, &rgb, &gray});
+
+	return framework.Execute(argc, argv);
 }
 --------------------------------------------------------------------------------
                                                                global_filters.h

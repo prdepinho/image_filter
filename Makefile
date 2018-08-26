@@ -2,7 +2,7 @@
 CC=g++
 CFLAGS=-I. `pkg-config --cflags --libs opencv`
 INCL=*.h
-OBJS=blur.o rgbsplit.o greyscale.o main.o
+OBJS=blur.o rgbsplit.o greyscale.o filter_framework.o main.o
 
 %.o: %.c $(INCL)
 	$(CC) -c -o $@ $< $(CFLAGS)
