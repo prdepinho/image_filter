@@ -26,17 +26,7 @@ public:
 	/* The input image's file name. Implementing this method is not necessary, but useful for naming
 	 * the output file, for example. */
 	virtual void SetFileName(std::string name) {}
-};
 
-
-/*
- * Class FilterView represents the input and output of information for a filter. 
- *
- * The main program calls these methods in order to pass command line arguments for either interaction mode
- * or to output the result.
- */
-class FilterView{
-public:
 	/* Returns the flag of the filter. It is used to chose the filter in non interactive mode. */
 	virtual std::string GetFlag() = 0;
 
@@ -52,7 +42,7 @@ public:
 	 * be one parameter value for each parameter name returned by
 	 * GetParameterNames. The method should check the validity of each
 	 * parameter and throw an exception for any error.  */
-	virtual void ProcessArgs(std::vector<std::string> arguments) = 0;
+	virtual void SetParameters(std::vector<std::string> arguments) = 0;
 
 	/* This method is called after the execution of the filter and can be used to save the output file. */
 	virtual void Output() = 0;

@@ -15,10 +15,11 @@ bool interactive;
 std::string filename;
 std::vector<std::string> arguments;
 
+
 int ProcessArgs(int argc, char **argv);
-void SetImageToFilter();
-void ProcessInput();
-void Execute(Filter *filter, FilterView *view);
+void SetImageToFilters();
+void ProcessInteraction();
+void ExecuteFilter(Filter *filter);
 inline void ShowType(cv::Mat image);
 
 int main(int argc, char **argv){
@@ -26,16 +27,19 @@ int main(int argc, char **argv){
 	Global::SetFilters();
 
 	try{
+
 		int index = ProcessArgs(argc, argv);
-		SetImageToFilter();
+		SetImageToFilters();
 
 		if(interactive){
-			ProcessInput();
+			ProcessInteraction();
 		}
 		else{
-			Global::views[index]->ProcessArgs(arguments);
-			Execute(Global::filters[index], Global::views[index]);
+			Global::filters[index]->SetParameters(arguments);
+			ExecuteFilter(Global::filters[index]);
 		}
+
+		
 
 	}catch(const FilterException &e){
 		std::cout << "Filter exception: " << e.what() << std::endl;
@@ -62,8 +66,8 @@ int ProcessArgs(int argc, char **argv){
 	// check if there is a flag
 	std::string flag(argv[1]);
 	int filter_index = -1;
-	for(int i = 0; i < Global::views.size(); i++){
-		if(flag.compare(Global::views[i]->GetFlag()) == 0){
+	for(int i = 0; i < Global::filters.size(); i++){
+		if(flag.compare(Global::filters[i]->GetFlag()) == 0){
 			filter_index = i;
 		}
 	}
@@ -86,7 +90,7 @@ int ProcessArgs(int argc, char **argv){
 	return filter_index;
 }
 
-void SetImageToFilter(){
+void SetImageToFilters(){
 	cv::Mat image = cv::imread(filename, cv::IMREAD_UNCHANGED);
 	if(!image.data){
 		throw std::invalid_argument("Could not open the image file.");
@@ -98,29 +102,27 @@ void SetImageToFilter(){
 	}
 }
 
-void ProcessInput(){
+void ProcessInteraction(){
 	std::cout << "Interactive mode" << std::endl;
 
-	// set applicable filter views that are shown on screen
-	std::vector<FilterView*> shown_views;
+	// set applicable filter filters that are shown on screen
 	std::vector<Filter*> shown_filters;
-	for(int i = 0; i < Global::views.size(); i++){
+	for(int i = 0; i < Global::filters.size(); i++){
 		if (Global::filters[i]->IsApplicable()){
-			shown_views.push_back(Global::views[i]);
 			shown_filters.push_back(Global::filters[i]);
 		}
 	}
-	if(shown_views.empty()){
+	if(shown_filters.empty()){
 		std::cout << "No filters available for input images" << std::endl;
 		return;
 	}
 	std::cout << "Available filters: " << std::endl;
-	for(int i = 0; i < shown_views.size(); i++){
-		std::cout << i + 1 << ": " << shown_views[i]->GetFilterName() << std::endl;
+	for(int i = 0; i < shown_filters.size(); i++){
+		std::cout << i + 1 << ": " << shown_filters[i]->GetFilterName() << std::endl;
 	}
 	std::cout << "0: Exit." << std::endl;
 
-	// read input
+	// read selected filter
 	int index = 0;
 	std::cin >> index;
 	if(index == 0){
@@ -130,10 +132,10 @@ void ProcessInput(){
 	if(index < 0 || index >= shown_filters.size()){
 		throw std::out_of_range("No filter selected");
 	}
-	std::cout << shown_views[index]->GetFlag() << " chosen" << std::endl;
+	std::cout << shown_filters[index]->GetFlag() << " chosen" << std::endl;
 
 	// read parameters
-	std::vector<std::string> parameter_names = shown_views[index]->GetParameterNames();
+	std::vector<std::string> parameter_names = shown_filters[index]->GetParameterNames();
 	if(!parameter_names.empty()){
 		std::cout << "Input parameters. To quit input 'q'." << std::endl;
 		std::vector<std::string> parameter_values;
@@ -146,19 +148,19 @@ void ProcessInput(){
 			}
 			parameter_values.push_back(input);
 		}
-		shown_views[index]->ProcessArgs(parameter_values); 
+		shown_filters[index]->SetParameters(parameter_values); 
 	}
 
-	Execute(shown_filters[index], shown_views[index]);
+	ExecuteFilter(shown_filters[index]);
 }
 
-void Execute(Filter *filter, FilterView *view){
+void ExecuteFilter(Filter *filter){
 	if(!filter->IsApplicable()){
 		throw FilterException("Filter is not applicable to input");
 	}
 	std::cout << "Working..." << std::endl;
 	filter->Apply();
-	view->Output();
+	filter->Output();
 	std::cout << "Finished." << std::endl;
 }
 

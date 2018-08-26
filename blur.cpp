@@ -55,3 +55,28 @@ std::vector<uchar> BlurFilter::GetNeighbors(cv::Mat &channel, int y, int x) cons
 	return neighbors;
 }
 
+void BlurFilter::SetParameters(std::vector<std::string> arguments){
+	int radius;
+	float weight;
+	if(arguments.size() < 2){
+		throw std::invalid_argument("Wrong number of arguments. Expected radius and weight for blur operation");
+	}
+	try{
+		radius = std::stoi(arguments[0]);
+		weight = std::stof(arguments[1]);
+	}catch(std::exception &e){
+		throw std::invalid_argument("Expected an int and a float");
+	}
+
+	if(radius < 1){
+		throw std::invalid_argument("Radius < 1");
+	}
+	if(weight <= 0.0f){
+		throw std::invalid_argument("Weight <= 0");
+	}
+}
+
+void BlurFilter::Output(){
+	cv::imwrite(("blurred_" + name).c_str(), result);
+}
+

@@ -5,7 +5,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/opencv.hpp>
 
-class RGBSplitFilter : public Filter, public FilterView {
+class RGBSplitFilter : public Filter {
 public:
 	virtual bool IsApplicable() const override;
 	virtual bool Apply() override;
@@ -15,7 +15,7 @@ public:
 	virtual std::string GetFlag() override { return "-rgb"; }
 	virtual std::string GetFilterName() const override { return "RGB Split"; }
 	virtual std::vector<std::string> GetParameterNames() const { return {}; }
-	virtual void ProcessArgs(std::vector<std::string> arguments) override {};
+	virtual void SetParameters(std::vector<std::string> arguments) override {};
 	virtual void Output() override;
 private:
 	std::string name;
