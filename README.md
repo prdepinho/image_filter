@@ -1,51 +1,57 @@
 
-How to use this program.
+# How to use this program.
 
 
 The following line applies the RGB Split (specified by the flag -rgb) filter on
 the input file lena.png:
 
+```
 ./main -rgb lena.png
+```
 
 If a filter requires flags, they should be put after the input filename, as the
 follows:
 
+```
 ./main -blur lena.png 5 1
+```
 
 These lines execute the program in non-interactive mode. If no flag is
 specified, the program enters interactive mode, as the following:
 
+```
 ./main lena.png
+```
 
 Then the program will show a list of available filters to choose from, and 
 request the user to input any necessary parameters.
 
-================================================================================
+
 
 The current implemented filters are the following:
 
 RGB Split: -rgb
 
-	Splits the color channels of an 8 bit image and saves one image for
+- Splits the color channels of an 8 bit image and saves one image for
 	each.
 
 Blur: -blur radius weght
 
-	Blurs an 8 bit image of any number of channls by setting each pixel as
+- Blurs an 8 bit image of any number of channls by setting each pixel as
 	the weighted mean of all its neighbors in its radius.
 
-	- radius: a positive integer
+  - radius: a positive integer
 
-	- weight: a float greater than zero.
+  - weight: a float greater than zero.
 
 Greyscale: -grey
 
-	Creates a single channel black and white version of an 8 bit color
+- Creates a single channel black and white version of an 8 bit color
 	image.
 
-================================================================================
 
-How to implement new filters.
+
+# How to implement new filters.
 
 
 Filter is the interface used by the program to interact with filters and to
@@ -62,14 +68,15 @@ In order to know more about the interface and their functions, view the
 documentation in filter.h.
 
 
-An example: A Greyscale filter. 
+## An example: A Greyscale filter. 
 
 This filter should receive an 8 bit colored image and return a black and white
 single channel image as output.
 
 What follows is the header file greyscale.h:
 
---------------------------------------------------------------------------------
+
+```
 #pragma once
 
 #include "filter.h"
@@ -91,8 +98,7 @@ private:
 	cv::Mat image;
 	cv::Mat result;
 };
---------------------------------------------------------------------------------
-                                                                    greyscale.h
+```
 
 Some of these functions are simple eneugh to be implemented in the header
 itself. SetImage and SetFileName are called by the program to set the input file
@@ -107,7 +113,7 @@ by the filter or not. It should take into consideration its image type. As
 illustrated below, GreyscaleFilter only accepts images of 3 or 4 channels of 8
 bits. Only applicable filters are shown as options in interactive mode.
 
---------------------------------------------------------------------------------
+```
 bool GreyscaleFilter::IsApplicable() const {
 	switch(image.type()){
 		case CV_8UC3: case CV_8UC4:
@@ -115,8 +121,7 @@ bool GreyscaleFilter::IsApplicable() const {
 	}
 	return false;
 }
---------------------------------------------------------------------------------
-                                                                  greyscale.cpp
+```
 
 GetFlag should return the flag used in non-interactive command line, while
 GetFilterName is the name that appears in the filter list in interactive mode.
@@ -133,7 +138,8 @@ The next code snippet shows how GreyscaleFilter creates a single channel 8 bit
 image as output and copies to it the avarage values of each pixel from each
 channel of the input image.
 
---------------------------------------------------------------------------------
+
+```
 bool GreyscaleFilter::Apply() {
 	cv::Mat channels[3];
 	result.create(image.rows, image.cols, CV_8UC1);
@@ -150,23 +156,23 @@ bool GreyscaleFilter::Apply() {
 		}
 	}
 }
---------------------------------------------------------------------------------
-                                                                  greyscale.cpp
+```
 
 Finally, the last function to be called is Output, which can be used to save
 the result image into a file, as is shown below.
 
---------------------------------------------------------------------------------
+```
 void GreyscaleFilter::Output(){
 	cv::imwrite(("grey_" + name).c_str(), result);
 }
---------------------------------------------------------------------------------
-                                                                  greyscale.cpp
+```
+
 
 When the filter is ready, you must create a variable of GreyscaleFilter in
 global_filters.h and add a reference to it to FilterFramework as so:
 
---------------------------------------------------------------------------------
+
+```
 int main(int argc, char **argv){
 
 	FilterFramework framework;
@@ -179,16 +185,15 @@ int main(int argc, char **argv){
 
 	return framework.Execute(argc, argv);
 }
---------------------------------------------------------------------------------
-                                                               global_filters.h
+```
 
 At last, do not forget to update the Makefile to include greyscale.o to the
 OBJS macro:
 
---------------------------------------------------------------------------------
+
+```
 OBJS=blur.o rgbsplit.o greyscale.o main.o
---------------------------------------------------------------------------------
-                                                                       Makefile
+```
 
 That should be every thing necessary to implement a new filter.
 
