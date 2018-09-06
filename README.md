@@ -1,4 +1,12 @@
 
+# Description.
+
+This program applies filters to input images. The result images are output in different files.
+
+This program depends on opencv, and though most filters are already implemented by this library, 
+I wrote them from scratch in order to study how they work and to demonstrate how to implement
+new filters in the program.
+
 # How to use this program.
 
 
